@@ -1,0 +1,41 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <Description>.NET DI-container extensions: property injections, load services definitions from JSON, extending </Description>
+    <Title>Extensions for .NET DI-container.</Title>
+	<Copyright>Copyright (c) 2023 Vitalii Fedorchenko</Copyright>
+    <AssemblyTitle>NReco.DependencyInjection</AssemblyTitle>
+    <VersionPrefix>1.0.0</VersionPrefix>
+    <Authors>Vitalii Fedorchenko</Authors>
+    <TargetFrameworks>netstandard2.0</TargetFrameworks>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <AssemblyName>NReco.DependencyInjection</AssemblyName>
+    <PackageId>NReco.DependencyInjection</PackageId>
+    <PackageTags>dependencyinjection;inversion-of-control</PackageTags>
+	<PackageReleaseNotes>Source code and examples: https://github.com/nreco/dependencyinjection
+		
+</PackageReleaseNotes>	
+    <PackageIconUrl>https://www.nrecosite.com/img/nreco-logo-200.png</PackageIconUrl>
+    <PackageProjectUrl>https://github.com/nreco/dependencyinjection/</PackageProjectUrl>
+    <PackageLicenseUrl>https://raw.githubusercontent.com/nreco/dependencyinjection/master/LICENSE</PackageLicenseUrl>
+    <RepositoryUrl>https://github.com/nreco/dependencyinjection</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>	
+    <GenerateAssemblyTitleAttribute>true</GenerateAssemblyTitleAttribute>
+    <GenerateAssemblyDescriptionAttribute>true</GenerateAssemblyDescriptionAttribute>
+    <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
+    <GenerateAssemblyCompanyAttribute>true</GenerateAssemblyCompanyAttribute>
+    <GenerateAssemblyProductAttribute>true</GenerateAssemblyProductAttribute>
+    <GenerateAssemblyCopyrightAttribute>true</GenerateAssemblyCopyrightAttribute>
+    <GenerateNeutralResourcesLanguageAttribute>false</GenerateNeutralResourcesLanguageAttribute>
+    <GenerateAssemblyVersionAttribute>true</GenerateAssemblyVersionAttribute>
+    <GenerateAssemblyFileVersionAttribute>true</GenerateAssemblyFileVersionAttribute>
+    <SignAssembly>false</SignAssembly>
+    <AssemblyOriginatorKeyFile>NReco.DependencyInjection.snk</AssemblyOriginatorKeyFile>	
+  </PropertyGroup>
+
+  <ItemGroup> 
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0" />
+    <PackageReference Include="System.Text.Json" Version="8.0.0" />
+  </ItemGroup>
+  
+</Project>
