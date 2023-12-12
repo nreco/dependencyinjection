@@ -1,8 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <Description>.NET DI-container extensions: property injections, load services definitions from JSON, extending </Description>
-    <Title>Extensions for .NET DI-container.</Title>
+    <Description>.NET DI-container extensions: declarative components and their dependencies definitions, generic components factory that supports both constructor and properties injections, JSON configuration loader.
+Examples: https://github.com/nreco/dependencyinjection
+</Description>
+    <Title>NReco extensions for standard .NET DI-container.</Title>
 	<Copyright>Copyright (c) 2023 Vitalii Fedorchenko</Copyright>
     <AssemblyTitle>NReco.DependencyInjection</AssemblyTitle>
     <VersionPrefix>1.0.0</VersionPrefix>
@@ -12,8 +14,7 @@
     <AssemblyName>NReco.DependencyInjection</AssemblyName>
     <PackageId>NReco.DependencyInjection</PackageId>
     <PackageTags>dependencyinjection;inversion-of-control</PackageTags>
-	<PackageReleaseNotes>Source code and examples: https://github.com/nreco/dependencyinjection
-		
+	<PackageReleaseNotes>v.1.0: initial release.
 </PackageReleaseNotes>	
     <PackageIconUrl>https://www.nrecosite.com/img/nreco-logo-200.png</PackageIconUrl>
     <PackageProjectUrl>https://github.com/nreco/dependencyinjection/</PackageProjectUrl>

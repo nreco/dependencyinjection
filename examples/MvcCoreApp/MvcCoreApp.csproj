@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp3.1</TargetFramework>  <!-- can be "netcoreapp3.1" or "net8.0" ! -->
+    <TargetFramework>net6.0</TargetFramework>  <!-- can be "netcoreapp3.1" or "net8.0" -->
   </PropertyGroup>
 
   <ItemGroup>

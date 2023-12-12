@@ -33,7 +33,7 @@ namespace NReco.DependencyInjection.Tests
 			Assert.Equal(5, ((OneArgConstructorObj)c2).IntProp);
 
 			var c3Factory = new ComponentFactory(
-				new ComponentDescriptor("c3", typeof(PropDepObj)));
+				new ComponentDescriptor("c3", typeof(PropDepObj)) { InjectDependencyAttr = true } );
 			var c3 = c3Factory.Create(container) as PropDepObj;
 			Assert.NotNull(c3);
 			Assert.NotNull(c3.PropDep);
@@ -65,7 +65,7 @@ namespace NReco.DependencyInjection.Tests
 				ByName = byName;
 			}
 
-			public object GetByName(string name) {
+			public object GetByName(Type t, string name) {
 				return ByName[name];
 			}
 
