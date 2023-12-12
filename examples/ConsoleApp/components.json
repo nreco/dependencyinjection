@@ -1,0 +1,28 @@
+{
+	"Defaults": {
+		"Lifetime": "Singleton",
+		"InjectDependencyAttr": false  // if 'true' properties with [Dependency] attr are injected by type implicitely
+	},
+	"Components": [
+		{
+			"Name": "c1",
+			"Type": "ConsoleApp.ComponentA",
+			"Constructor": [ { "$ref": "c2" } ],
+			"Properties": {
+				"Name": "c1",
+				"StrListDependency": [ "A", "B", "C", {"$ref": "c3str"} ]
+			}
+		},
+		{
+			"Name": "c2",
+			"Type": "ConsoleApp.ComponentA",
+			"ServiceType" : "IService",
+			"Properties": { "Name": "c2" }
+		},
+		{
+			"Name": "c3str",
+			"Type": "String",
+			"Constructor": [ [ "s", "t", "r" ] ]
+		}
+	]
+}
