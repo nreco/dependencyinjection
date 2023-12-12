@@ -5,6 +5,6 @@ using System.Text;
 namespace NReco.DependencyInjection {
 	public interface IComponentContainer {
 		object GetByType(Type t);
-		object GetByName(string name);
+		object GetByName(Type t, string name);
 	}
 }

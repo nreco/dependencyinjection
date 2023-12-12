@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.IO;
 using System.Text.Json;
 using Microsoft.Extensions.DependencyInjection;
 using NReco.DependencyInjection.Configuration;
@@ -10,9 +11,22 @@ namespace NReco.DependencyInjection {
 
 	public static class ServiceCollectionExtensions {
 
-		public static IServiceCollection LoadComponentsFromJson(this IServiceCollection services, string configJson) {
-			var jsonDoc = JsonDocument.Parse(configJson);
+		public static IServiceCollection LoadComponentsFromJsonFile(this IServiceCollection services, string configJsonFile, Action<JsonLoaderOptions> initOptions = null) {
+			using (var fs = new FileStream(configJsonFile, FileMode.Open, FileAccess.Read)) {
+				var opts = new JsonLoaderOptions();
+				initOptions?.Invoke(opts);
+				var jsonDoc = JsonDocument.Parse(fs, opts.JsonDocOptions);
+				var loader = new JsonLoader(opts);
+				var components = loader.Load(jsonDoc.RootElement);
+				RegisterComponents(services, components);
+				return services;
+			}
+		}
+
+		public static IServiceCollection LoadComponentsFromJson(this IServiceCollection services, string configJson, Action<JsonLoaderOptions> initOptions = null) {
 			var opts = new JsonLoaderOptions();
+			initOptions?.Invoke(opts);
+			var jsonDoc = JsonDocument.Parse(configJson, opts.JsonDocOptions);
 			var loader = new JsonLoader(opts);
 			var components = loader.Load(jsonDoc.RootElement);
 			RegisterComponents(services, components);
@@ -37,7 +51,7 @@ namespace NReco.DependencyInjection {
 				SrvPrv = srvPrv;
 			}
 
-			public object GetByName(string name) => SrvPrv.GetKeyedService<object>(name);
+			public object GetByName(Type t, string name) => SrvPrv.GetRequiredKeyedService(t, name);
 
 			public object GetByType(Type t) => SrvPrv.GetService(t);
 

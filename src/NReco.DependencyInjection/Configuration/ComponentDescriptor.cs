@@ -6,8 +6,6 @@ namespace NReco.DependencyInjection.Configuration {
 	public class ComponentDescriptor {
 
 		public ServiceLifetime Lifetime { get; set; } = ServiceLifetime.Transient;
-
-		public bool LazyInit { get; set; } = true;
 	
 		public string Name { get; set; }
 
@@ -21,15 +19,14 @@ namespace NReco.DependencyInjection.Configuration {
 		
 		public ClassPropertyDescriptor[] Properties { get; set; }
 
-		public bool InjectDependencyProps { get; set; } = true;
+		public bool InjectDependencyAttr { get; set; } = false;
 
 		public ComponentDescriptor() { }
 
-		public ComponentDescriptor(string name, Type t, ServiceLifetime lifetime = ServiceLifetime.Transient, bool lazyInit = true) {
+		public ComponentDescriptor(string name, Type t, ServiceLifetime lifetime = ServiceLifetime.Transient) {
 			Name = name;
 			ImplementationType = t;
 			Lifetime = lifetime;
-			LazyInit = lazyInit;
 		}
 
 

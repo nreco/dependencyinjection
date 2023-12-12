@@ -17,11 +17,21 @@ namespace NReco.DependencyInjection {
 		}
 
 		public IList<ComponentDescriptor> Load(JsonElement rootElem) {
-			if (rootElem.ValueKind==JsonValueKind.Array) {
-				return ParseFromArray(rootElem);
-			} else {
-				// TBD
-				// process as config object that may contain defaults
+			if (Options.ComponentDefaults == null)
+				Options.ComponentDefaults = new ComponentDescriptor();
+			switch (rootElem.ValueKind) {
+				case JsonValueKind.Array:
+					return ParseFromArray(rootElem);
+				case JsonValueKind.Object:
+					// process as config object that may contain defaults
+					var componentsEl = GetJsonObjProp(rootElem, "Components", true);
+					if (componentsEl.Value.ValueKind != JsonValueKind.Array)
+						throw new JsonException("Components entry should have an Array type.");
+					var defaultsEl = GetJsonObjProp(rootElem, "Defaults", false);
+					if (defaultsEl.HasValue) {
+						Options.ComponentDefaults = ParseComponentDescriptor(defaultsEl.Value, false);
+					}
+					return ParseFromArray(componentsEl.Value);
 			}
 			throw new JsonException($"Cannot load components from type: {rootElem.ValueKind} (expected: Array).");
 		}
@@ -30,24 +40,21 @@ namespace NReco.DependencyInjection {
 			return arrElem.EnumerateArray().Select(elem => ParseComponentDescriptor(elem)).ToList();
 		}
 
-		ComponentDescriptor ParseComponentDescriptor(JsonElement elem) {
+		ComponentDescriptor ParseComponentDescriptor(JsonElement elem, bool typeRequired = true) {
 			if (elem.ValueKind != JsonValueKind.Object)
 				throw new JsonException($"Invalid type for component descriptor: {elem.ValueKind} (expected: Object).");
-			var implTypeStr = GetJsonPropStringValue(GetJsonObjProp(elem, "Type", true), null);
-			var implType = Options.TypeResolver.ResolveType(implTypeStr);
+			var implTypeStr = GetJsonPropStringValue(GetJsonObjProp(elem, "Type", typeRequired), null);
+			var implType = implTypeStr!=null ? Options.TypeResolver.ResolveType(implTypeStr) : null;
 			var name = GetJsonPropStringValue(GetJsonObjProp(elem, "Name", false), null);
 			var serviceTypeStr = GetJsonPropStringValue(GetJsonObjProp(elem, "ServiceType", false), null);
 			var serviceType = serviceTypeStr != null ? Options.TypeResolver.ResolveType(serviceTypeStr, implType) : null;
 			var initMethod = GetJsonPropStringValue(GetJsonObjProp(elem, "InitMethod", false), null);
 			var lifetimeStr = GetJsonPropStringValue(GetJsonObjProp(elem, "Lifetime", false), null);
-			var lifetime = lifetimeStr != null ? (ServiceLifetime)Enum.Parse(typeof(ServiceLifetime), lifetimeStr, true) : ServiceLifetime.Transient;
-			var lazyInitEl = GetJsonObjProp(elem, "LazyInit", false);
-			var lazyInit = true;
-			if (lazyInitEl.HasValue && (
-					lazyInitEl.Value.ValueKind == JsonValueKind.False ||
-					(lazyInitEl.Value.ValueKind==JsonValueKind.Number && lazyInitEl.Value.GetDecimal()==0) ))
-				lazyInit = false;
-			var c = new ComponentDescriptor(name, implType, lifetime, lazyInit);
+			var lifetime = lifetimeStr != null ? (ServiceLifetime)Enum.Parse(typeof(ServiceLifetime), lifetimeStr, true) : Options.ComponentDefaults.Lifetime;
+			var injectDependencyAttrEl = GetJsonObjProp(elem, "InjectDependencyAttr", false);
+			var injectDependencyAttr = GetJsonPropBoolValue(injectDependencyAttrEl, Options.ComponentDefaults.InjectDependencyAttr);
+			var c = new ComponentDescriptor(name, implType, lifetime);
+			c.InjectDependencyAttr = injectDependencyAttr;
 			if (serviceType != null)
 				c.ServiceType = serviceType;
 			if (initMethod != null)
@@ -87,18 +94,31 @@ namespace NReco.DependencyInjection {
 					return new ListDescriptor(listValues);
 				case JsonValueKind.Object:
 					var refStr = GetJsonPropStringValue(GetJsonObjProp(el, "$ref", false), null);
-					if (!String.IsNullOrEmpty(refStr))
-						return new RefDescriptor(new ComponentDescriptor(refStr, null));
+					if (!String.IsNullOrEmpty(refStr)) {
+						var serviceTypeStr = GetJsonPropStringValue(GetJsonObjProp(el, "ServiceType", false), null);
+						var serviceType = serviceTypeStr != null ? Options.TypeResolver.ResolveType(serviceTypeStr) : null;
+						return new RefDescriptor(new ComponentDescriptor(refStr, null) { ServiceType = serviceType });
+					}
 					if (el.EnumerateObject().Count() == 0)
 						return new RefDescriptor(null); // resolve by type
 					if (!GetJsonObjProp(el, "Type", false).HasValue) {
 						var dictValues = el.EnumerateObject()
-							.Select( oProp => new DictionaryEntryDescriptor(oProp.Name, ParseValueDescriptor(oProp.Value) ) ).ToArray();
+							.Select( oProp => new DictionaryEntryDescriptor(
+								HandleEscapedSpecialProps(oProp.Name),
+								ParseValueDescriptor(oProp.Value) ) ).ToArray();
 						return new DictionaryDescriptor(dictValues);
 					}
 					return new RefDescriptor( ParseComponentDescriptor(el) );
 			}
 			throw new JsonException();
+		}
+
+		string HandleEscapedSpecialProps(string propName) {
+			if (propName == "\\$ref")
+				return "$ref";
+			if (propName.Length > 0 && propName[0] == '\\' && propName.Equals("\\type", StringComparison.OrdinalIgnoreCase))
+				return propName.Substring(1);
+			return propName;
 		}
 
 
@@ -107,6 +127,20 @@ namespace NReco.DependencyInjection {
 				return pEl.Value.GetString();
 			return defaultVal;
 		}
+
+		bool GetJsonPropBoolValue(JsonElement? pEl, bool defaultVal) {
+			if (pEl.HasValue)
+				switch (pEl.Value.ValueKind) {
+					case JsonValueKind.True:
+						return true;
+					case JsonValueKind.False:
+						return false;
+					case JsonValueKind.Number:
+						return pEl.Value.GetDecimal() != 0;
+				}
+			return defaultVal;
+		}
+
 
 		JsonElement? GetJsonObjProp(JsonElement objEl, string propName, bool required = true) {
 			if (objEl.TryGetProperty(propName, out var pEl)) {

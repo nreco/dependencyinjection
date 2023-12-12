@@ -21,12 +21,16 @@ namespace NReco.DependencyInjection.Tests
 
 			var c2Factory = new ComponentFactory(
 				new ComponentDescriptor("c2", typeof(OneArgConstructorObj)) {
-					Properties = new [] { new ClassPropertyDescriptor("Prop", new ValueDescriptor("Test1") ) }
+					Properties = new [] { 
+						new ClassPropertyDescriptor("Prop", new ValueDescriptor("Test1") ),
+						new ClassPropertyDescriptor("IntProp", new ValueDescriptor(5M) )
+					}
 				});
 			var c2 = c2Factory.Create(container);
 			Assert.True(c2 is OneArgConstructorObj);
 			Assert.True(((OneArgConstructorObj)c2).A is EmptyConstructorObj);
 			Assert.Equal("Test1", ((OneArgConstructorObj)c2).Prop);
+			Assert.Equal(5, ((OneArgConstructorObj)c2).IntProp);
 
 			var c3Factory = new ComponentFactory(
 				new ComponentDescriptor("c3", typeof(PropDepObj)));
@@ -41,6 +45,7 @@ namespace NReco.DependencyInjection.Tests
 
 		public class OneArgConstructorObj {
 			public string Prop { get; set; }
+			public int IntProp { get; set; }
 			public EmptyConstructorObj A;
 			public OneArgConstructorObj(EmptyConstructorObj a) {
 				A = a;

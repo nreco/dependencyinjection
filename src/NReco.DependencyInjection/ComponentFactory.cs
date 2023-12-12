@@ -38,9 +38,12 @@ namespace NReco.DependencyInjection {
 				return o;
 
 			// try component model converters
-			TypeConverter converter = TypeDescriptor.GetConverter(toType);
-			if (converter != null && converter.CanConvertFrom(o.GetType()))
-				return converter.ConvertFrom(o);
+			var toConverter = TypeDescriptor.GetConverter(toType);
+			if (toConverter != null && toConverter.CanConvertFrom(o.GetType()))
+				return toConverter.ConvertFrom(o);
+			var fromConverter = TypeDescriptor.GetConverter(o.GetType());
+			if (fromConverter != null && fromConverter.CanConvertTo(toType))
+				return fromConverter.ConvertTo(o, toType);
 			throw new InvalidCastException(String.Format("Cannot convert from {0} to {1}", o.GetType(), toType));
 		}
 
@@ -114,7 +117,7 @@ namespace NReco.DependencyInjection {
 					}
 
 				// inject properties marked with dependency attr
-				if (componentDescriptor.InjectDependencyProps) {
+				if (componentDescriptor.InjectDependencyAttr) {
 					var publicProps = componentDescriptor.ImplementationType.GetProperties();
 					for (int i = 0; i < publicProps.Length; i++) {
 						var p = publicProps[i];
@@ -202,7 +205,7 @@ namespace NReco.DependencyInjection {
 				if (componentDescriptor == null) {
 					instance = Container.GetByType(requiredType);
 				} else if (componentDescriptor.Name != null) {
-					instance = Container.GetByName(componentDescriptor.Name);
+					instance = Container.GetByName(componentDescriptor.ServiceType ?? requiredType, componentDescriptor.Name);
 				} else {
 					instance = Factory.CreateInstance(componentDescriptor, this);
 				}
